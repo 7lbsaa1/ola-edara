@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>مكتبة الصور — المواد الخمس</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  :root{
+    --bg:#f5f6fb; --card:#fff; --ink:#0f172a; --muted:#64748b; --line:#e8eaf2;
+    --brand:#5b5bd6; --radius:18px; --shadow:0 12px 30px rgba(15,23,42,.08);
+  }
+  html,body{margin:0}
+  body{
+    font-family:'Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif;
+    background:
+      radial-gradient(1000px 480px at 100% -10%, #e7e9ff 0%, transparent 60%),
+      radial-gradient(900px 480px at -10% 0%, #e6fbff 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink); min-height:100vh; padding-bottom:110px;
+  }
+  .hero{padding:44px 18px 22px; text-align:center}
+  .badge{display:inline-block;background:#fff;border:1px solid var(--line);padding:7px 14px;
+    border-radius:999px;font-size:13px;color:var(--muted);box-shadow:var(--shadow)}
+  .hero h1{font-size:clamp(24px,4.6vw,40px);margin:16px 0 8px;letter-spacing:-.5px}
+  .hero p{margin:0 auto;max-width:660px;color:var(--muted);line-height:1.9;font-size:15px}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:18px 0 22px}
+  .chip{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);
+    padding:9px 14px;border-radius:999px;font:inherit;font-size:14px;color:#334155;cursor:pointer;
+    transition:.2s;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+  .chip:hover{transform:translateY(-1px)}
+  .chip .n{background:#f1f5f9;border-radius:999px;padding:1px 8px;font-size:12px;color:var(--muted)}
+  .chip.on{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-color:transparent;
+    box-shadow:0 10px 22px rgba(79,70,229,.32)}
+  .chip.on .n{background:rgba(255,255,255,.22);color:#fff}
+
+  .grid{list-style:none;margin:0;padding:0;display:grid;gap:14px;
+    grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+  .card{position:relative;border-radius:var(--radius);overflow:hidden;background:#fff;
+    box-shadow:var(--shadow);aspect-ratio:1/1;cursor:zoom-in;border:1px solid #fff}
+  .card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .55s ease}
+  .card:hover img{transform:scale(1.06)}
+  .card .tag{position:absolute;inset-inline-start:8px;bottom:8px;background:rgba(15,23,42,.62);
+    color:#fff;font-size:12px;padding:5px 10px;border-radius:999px;backdrop-filter:blur(8px)}
+  .card .date{position:absolute;inset-inline-end:8px;top:8px;background:rgba(255,255,255,.9);
+    color:#0f172a;font-size:11px;padding:4px 9px;border-radius:999px;font-weight:700}
+  .empty{text-align:center;color:var(--muted);padding:60px 0}
+
+  .fab{position:fixed;inset-inline-start:22px;bottom:24px;z-index:40;border:0;cursor:pointer;
+    padding:15px 22px;border-radius:999px;font:inherit;font-weight:800;font-size:15px;color:#fff;
+    background:linear-gradient(135deg,#4f46e5,#7c3aed);
+    box-shadow:0 16px 34px rgba(79,70,229,.42);transition:.2s}
+  .fab:hover{transform:translateY(-2px)}
+
+  dialog{border:0;padding:0;border-radius:22px;width:min(520px,94vw);box-shadow:0 30px 70px rgba(15,23,42,.3)}
+  dialog::backdrop{background:rgba(15,23,42,.55);backdrop-filter:blur(3px)}
+  .dlg-in{padding:22px}
+  .dlg-in h2{margin:0 0 4px;font-size:20px}
+  .dlg-in .sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+  .drop{border:2px dashed #cbd5e1;border-radius:16px;padding:22px;text-align:center;cursor:pointer;
+    transition:.2s;background:#fafbff}
+  .drop:hover,.drop.hot{border-color:var(--brand);background:#f3f2ff}
+  .drop .big{font-size:26px}
+  .drop p{margin:8px 0 0;font-size:13px;color:var(--muted)}
+  .drop img{max-width:100%;max-height:190px;border-radius:12px;object-fit:contain}
+  label.f{display:block;margin:14px 0 6px;font-size:13px;font-weight:700;color:#334155}
+  select,input[type=date],input[type=text]{width:100%;padding:11px 12px;border:1px solid var(--line);
+    border-radius:12px;font:inherit;font-size:14px;background:#fff;color:var(--ink)}
+  select:focus,input:focus{outline:2px solid #c7d2fe;border-color:#a5b4fc}
+  .row{display:flex;gap:10px}
+  .row>*{flex:1}
+  .actions{display:flex;gap:10px;margin-top:18px}
+  .btn{flex:1;padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;
+    font:inherit;font-weight:700;cursor:pointer;transition:.2s}
+  .btn.primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-color:transparent}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .status{font-size:13px;margin-top:12px;min-height:18px;color:var(--muted);text-align:center}
+  .status.err{color:#dc2626}
+
+  .lb{position:fixed;inset:0;background:rgba(9,12,25,.92);display:none;place-items:center;z-index:60;
+    padding:20px;cursor:zoom-out}
+  .lb.on{display:grid}
+  .lb img{max-width:96vw;max-height:82vh;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .lb .bar{position:absolute;bottom:18px;display:flex;gap:10px;align-items:center;
+    background:rgba(255,255,255,.12);padding:10px 16px;border-radius:999px;color:#fff;font-size:13px}
+  .lb .bar a{color:#fff;text-decoration:none;background:rgba(255,255,255,.2);padding:6px 12px;border-radius:999px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="badge">مكتبة صور المواد</div>
+  <h1>كل صورك في مكان واحد</h1>
+  <p>إدارة أعمال · قانون · محاسبة مالية · مهارات اتصال · اقتصاد</p>
+</header>
+
+<div class="wrap">
+  <nav class="chips" id="chips"></nav>
+  <ul class="grid" id="grid"></ul>
+  <p class="empty" id="empty" hidden>لا توجد صور في هذا القسم بعد — اضغط «إضافة صورة».</p>
+</div>
+
+<button class="fab" id="openAdd">＋ إضافة صورة</button>
+
+<dialog id="addDlg">
+  <form class="dlg-in" id="addForm" method="dialog">
+    <h2>إضافة صورة</h2>
+    <p class="sub">الصورة هتتضغط تلقائيًا قبل الرفع (بدون أي رابط).</p>
+
+    <div class="drop" id="drop">
+      <div id="dropInner">
+        <div class="big">🖼️</div>
+        <p>اضغط لاختيار صورة أو اسحبها هنا</p>
+      </div>
+    </div>
+    <input type="file" id="file" accept="image/*" hidden>
+
+    <label class="f" for="subject">المادة</label>
+    <select id="subject" required></select>
+
+    <div class="row">
+      <div>
+        <label class="f" for="date">التاريخ (اختياري)</label>
+        <input type="date" id="date">
+      </div>
+      <div>
+        <label class="f" for="title">عنوان الصورة (اختياري)</label>
+        <input type="text" id="title" maxlength="80" placeholder="مثال: ملخص الفصل ٣">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" id="cancelBtn">إلغاء</button>
+      <button type="submit" class="btn primary" id="saveBtn" disabled>رفع الصورة</button>
+    </div>
+    <div class="status" id="status"></div>
+  </form>
+</dialog>
+
+<div class="lb" id="lb">
+  <img id="lbImg" alt="">
+  <div class="bar">
+    <span id="lbMeta"></span>
+    <a id="lbDl" download="image.jpg">تحميل</a>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+/* ---------- Firebase ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyDFiyqHVrAumRP5Qudk_-4f-yAVSdW3DIM",
+  authDomain: "ola-edara.firebaseapp.com",
+  projectId: "ola-edara",
+  storageBucket: "ola-edara.firebasestorage.app",
+  messagingSenderId: "816614473943",
+  appId: "1:816614473943:web:586042d3d1d1ba4fdfb092",
+  measurementId: "G-M6PWYJ1YGC"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+/* ---------- الأقسام الخمسة ---------- */
+const SUBJECTS = [
+  { id:'business',      name:'إدارة أعمال',   emoji:'🏢' },
+  { id:'law',           name:'قانون',          emoji:'⚖️' },
+  { id:'accounting',    name:'محاسبة مالية',   emoji:'📊' },
+  { id:'communication', name:'مهارات اتصال',   emoji:'💬' },
+  { id:'economics',     name:'اقتصاد',         emoji:'📈' }
+];
+const byId = Object.fromEntries(SUBJECTS.map(s => [s.id, s]));
+
+/* ---------- state ---------- */
+let images = [];
+let active = 'all';
+
+const $ = id => document.getElementById(id);
+const gridEl = $('grid'), chipsEl = $('chips'), emptyEl = $('empty');
+const dlg = $('addDlg'), form = $('addForm'), statusEl = $('status');
+
+/* ---------- helpers ---------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+  { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+));
+const b64bytes = d => Math.round((d.length - (d.indexOf(',') + 1)) * 0.75);
+const fmtDate = d => d ? d : '';
+const sizeTxt = b => b >= 1024 ? (b / 1024).toFixed(0) + ' KB' : b + ' B';
+
+/* ---------- chips ---------- */
+function renderChips() {
+  const counts = { all: images.length };
+  SUBJECTS.forEach(s => counts[s.id] = 0);
+  images.forEach(i => { if (counts[i.subject] !== undefined) counts[i.subject]++; });
+
+  chipsEl.innerHTML =
+    `<button class="chip ${active === 'all' ? 'on' : ''}" data-id="all">الكل <span class="n">${counts.all}</span></button>` +
+    SUBJECTS.map(s => `
+      <button class="chip ${active === s.id ? 'on' : ''}" data-id="${s.id}">
+        ${s.emoji} ${s.name} <span class="n">${counts[s.id]}</span>
+      </button>`).join('');
+
+  chipsEl.querySelectorAll('.chip').forEach(b => {
+    b.onclick = () => { active = b.dataset.id; renderChips(); renderGrid(); };
+  });
+}
+
+/* ---------- grid ---------- */
+function renderGrid() {
+  const list = active === 'all' ? images : images.filter(i => i.subject === active);
+
+  gridEl.innerHTML = list.map(i => {
+    const s = byId[i.subject] || { name: i.subject, emoji: '🖼️' };
+    const src = i.thumb || i.dataUrl;
+    return `<li class="card" data-id="${i.id}">
+      <img loading="lazy" src="${src}" alt="${esc(i.title || s.name)}">
+      ${i.date ? `<span class="date">${esc(i.date)}</span>` : ''}
+      <span class="tag">${s.emoji} ${esc(i.title || s.name)}</span>
+    </li>`;
+  }).join('');
+
+  emptyEl.hidden = list.length > 0;
+
+  gridEl.querySelectorAll('.card').forEach(card => {
+    card.onclick = () => openLightbox(card.dataset.id);
+  });
+}
+
+/* ---------- lightbox ---------- */
+const lb = $('lb'), lbImg = $('lbImg'), lbMeta = $('lbMeta'), lbDl = $('lbDl');
+function openLightbox(id) {
+  const img = images.find(i => i.id === id);
+  if (!img) return;
+  const s = byId[img.subject] || { name: img.subject };
+  lbImg.src = img.dataUrl;
+  lbMeta.textContent = [s.name, img.date, img.bytes ? sizeTxt(img.bytes) : ''].filter(Boolean).join(' · ');
+  lbDl.href = img.dataUrl;
+  lbDl.download = (img.title || s.name) + '.jpg';
+  lb.classList.add('on');
+}
+lb.onclick = e => { if (e.target === lb) lb.classList.remove('on'); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('on'); });
+
+/* ---------- ضغط الصورة في المتصفح ---------- */
+async function decode(file) {
+  if ('createImageBitmap' in window) {
+    try { return await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch (_) {}
+  }
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    return img;
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+}
+
+function drawTo(img, maxSide, quality) {
+  const iw = img.width || img.naturalWidth;
+  const ih = img.height || img.naturalHeight;
+  const scale = Math.min(1, maxSide / Math.max(iw, ih));
+  const w = Math.max(1, Math.round(iw * scale));
+  const h = Math.max(1, Math.round(ih * scale));
+
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(img, 0, 0, w, h);
+
+  const dataUrl = c.toDataURL('image/jpeg', quality);
+  return { dataUrl, w, h, bytes: b64bytes(dataUrl) };
+}
+
+/** ضغط تدريجي لحد ما الحجم ينزل تحت maxBytes (سقف Firestore = 1MB للمستند) */
+async function compress(file, { maxSide = 1500, quality = 0.78, maxBytes = 700 * 1024 } = {}) {
+  const img = await decode(file);
+  let side = maxSide, q = quality, out = null;
+
+  for (let i = 0; i < 6; i++) {
+    out = drawTo(img, side, q);
+    if (out.bytes <= maxBytes) break;
+    side = Math.round(side * 0.8);
+    q = Math.max(0.45, q - 0.08);
+  }
+  const thumb = drawTo(img, 420, 0.6);
+  return { full: out, thumb };
+}
+
+/* ---------- dialog / form ---------- */
+const fileIn = $('file'), drop = $('drop'), dropInner = $('dropInner');
+const subjectSel = $('subject'), dateIn = $('date'), titleIn = $('title');
+const saveBtn = $('saveBtn');
+
+subjectSel.innerHTML = SUBJECTS.map(s => `<option value="${s.id}">${s.emoji} ${s.name}</option>`).join('');
+
+let pending = null; // { dataUrl, thumb, w, h, bytes, name }
+
+function setStatus(msg, isErr = false) {
+  statusEl.textContent = msg;
+  statusEl.classList.toggle('err', isErr);
+}
+
+function resetForm() {
+  pending = null;
+  fileIn.value = '';
+  dateIn.value = '';
+  titleIn.value = '';
+  dropInner.innerHTML = `<div class="big">🖼️</div><p>اضغط لاختيار صورة أو اسحبها هنا</p>`;
+  saveBtn.disabled = true;
+  setStatus('');
+}
+
+$('openAdd').onclick = () => { resetForm(); dlg.showModal(); };
+$('cancelBtn').onclick = () => dlg.close();
+
+drop.onclick = () => fileIn.click();
+fileIn.onchange = () => fileIn.files[0] && handleFile(fileIn.files[0]);
+
+['dragover', 'dragenter'].forEach(ev => drop.addEventListener(ev, e => {
+  e.preventDefault(); drop.classList.add('hot');
+}));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => {
+  e.preventDefault(); drop.classList.remove('hot');
+}));
+drop.addEventListener('drop', e => {
+  const f = e.dataTransfer.files?.[0];
+  if (f && f.type.startsWith('image/')) handleFile(f);
+});
+
+async function handleFile(file) {
+  if (!file.type.startsWith('image/')) return setStatus('الملف لازم يكون صورة.', true);
+  setStatus('جارٍ ضغط الصورة…');
+  saveBtn.disabled = true;
+
+  try {
+    const { full, thumb } = await compress(file);
+    pending = {
+      dataUrl: full.dataUrl,
+      thumb: thumb.dataUrl,
+      width: full.w,
+      height: full.h,
+      bytes: full.bytes,
+      name: file.name
+    };
+
+    dropInner.innerHTML =
+      `<img src="${full.dataUrl}" alt="معاينة">
+       <p>${full.w}×${full.h} — ${sizeTxt(full.bytes)} (من ${sizeTxt(file.size)})</p>`;
+
+    saveBtn.disabled = false;
+    setStatus('الصورة جاهزة، اختار المادة واضغط رفع.');
+  } catch (err) {
+    console.error(err);
+    setStatus('تعذر قراءة الصورة، جرّب صورة JPEG/PNG تانية.', true);
+  }
+}
+
+form.onsubmit = async e => {
+  e.preventDefault();
+  if (!pending) return;
+
+  saveBtn.disabled = true;
+  setStatus('جارٍ الرفع…');
+
+  try {
+    await addDoc(collection(db, 'images'), {
+      subject: subjectSel.value,
+      date: dateIn.value || null,
+      title: titleIn.value.trim() || null,
+      dataUrl: pending.dataUrl,
+      thumb: pending.thumb,
+      width: pending.width,
+      height: pending.height,
+      bytes: pending.bytes,
+      originalName: pending.name,
+      createdAt: serverTimestamp()
+    });
+
+    setStatus('تم الرفع بنجاح ✅');
+    setTimeout(() => dlg.close(), 600);
+  } catch (err) {
+    console.error(err);
+    setStatus('فشل الرفع: ' + (err.code || err.message), true);
+    saveBtn.disabled = false;
+  }
+};
+
+/* ---------- realtime ---------- */
+const q = query(collection(db, 'images'), orderBy('createdAt', 'desc'), limit(300));
+
+onSnapshot(q,
+  snap => {
+    images = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderChips();
+    renderGrid();
+  },
+  err => {
+    console.error(err);
+    emptyEl.hidden = false;
+    emptyEl.textContent = 'مشكلة في قراءة البيانات: ' + err.code;
+  }
+);
+</script>
+</body>
+</html>
