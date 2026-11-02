@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>لوحة الإدارة</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Tajawal',system-ui,sans-serif;background:#f5f6fb;color:#0f172a}
+  .head{padding:22px 16px;display:flex;justify-content:space-between;align-items:center;
+    gap:12px;flex-wrap:wrap;max-width:1120px;margin:0 auto}
+  .head h1{font-size:20px;margin:0}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 16px 60px}
+  .card{background:#fff;border:1px solid #e8eaf2;border-radius:18px;padding:18px;
+    box-shadow:0 12px 30px rgba(15,23,42,.07)}
+  input,select,button{font:inherit}
+  input,select{padding:10px 12px;border:1px solid #e8eaf2;border-radius:12px;background:#fff}
+  button{padding:10px 16px;border-radius:12px;border:1px solid #e8eaf2;background:#fff;
+    font-weight:700;cursor:pointer}
+  button.p{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-color:transparent}
+  button.d{color:#dc2626;border-color:#fecaca;background:#fef2f2}
+  .login{max-width:380px;margin:12vh auto}
+  .login input{width:100%;margin-bottom:10px}
+  .login button{width:100%}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:10px 8px;border-bottom:1px solid #eef1f7;text-align:right;vertical-align:middle}
+  th{color:#64748b;font-size:12px;font-weight:700}
+  td img{width:64px;height:64px;object-fit:cover;border-radius:10px;display:block}
+  .muted{color:#64748b;font-size:12px}
+  .hide{display:none!important}
+  #msg{margin-top:10px;font-size:13px;color:#dc2626}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>لوحة إدارة الصور</h1>
+  <div id="userBox" class="hide">
+    <span class="muted" id="whoami"></span>
+    <button id="logout">خروج</button>
+  </div>
+</div>
+
+<!-- تسجيل الدخول -->
+<div class="wrap" id="loginBox">
+  <form class="card login" id="loginForm">
+    <h2 style="margin-top:0">دخول الأدمن</h2>
+    <input type="email" id="email" placeholder="الإيميل" required>
+    <input type="password" id="pass" placeholder="الباسورد" required>
+    <button class="p" type="submit">دخول</button>
+    <div id="msg"></div>
+  </form>
+</div>
+
+<!-- اللوحة -->
+<div class="wrap hide" id="panel">
+  <div class="card">
+    <div class="filters">
+      <select id="fSubject">
+        <option value="all">كل المواد</option>
+      </select>
+      <input type="text" id="fSearch" placeholder="بحث بالعنوان…">
+      <button id="export">تصدير JSON</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>الصورة</th><th>العنوان</th><th>المادة</th>
+          <th>التاريخ</th><th>الحجم</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="muted" id="stat" style="margin-bottom:0"></p>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, query, orderBy, limit,
+         doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFiyqHVrAumRP5Qudk_-4f-yAVSdW3DIM",
+  authDomain: "ola-edara.firebaseapp.com",
+  projectId: "ola-edara",
+  storageBucket: "ola-edara.firebasestorage.app",
+  messagingSenderId: "816614473943",
+  appId: "1:816614473943:web:586042d3d1d1ba4fdfb092",
+  measurementId: "G-M6PWYJ1YGC"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const auth = getAuth(app);
+
+const SUBJECTS = [
+  { id:'business',      name:'إدارة أعمال',   emoji:'🏢' },
+  { id:'law',           name:'قانون',          emoji:'⚖️' },
+  { id:'accounting',    name:'محاسبة مالية',   emoji:'📊' },
+  { id:'communication', name:'مهارات اتصال',   emoji:'💬' },
+  { id:'economics',     name:'اقتصاد',         emoji:'📈' }
+];
+const byId = Object.fromEntries(SUBJECTS.map(s => [s.id, s]));
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+  { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+));
+const sizeTxt = b => !b ? '—' : b >= 1024 ? (b / 1024).toFixed(0) + ' KB' : b + ' B';
+
+$('fSubject').innerHTML += SUBJECTS.map(s =>
+  `<option value="${s.id}">${s.emoji} ${s.name}</option>`).join('');
+
+let images = [];
+
+/* ---------- auth ---------- */
+$('loginForm').onsubmit = async e => {
+  e.preventDefault();
+  $('msg').textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, $('email').value.trim(), $('pass').value);
+  } catch (err) {
+    $('msg').textContent = 'فشل الدخول: ' + (err.code || err.message);
+  }
+};
+
+$('logout').onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, user => {
+  $('loginBox').classList.toggle('hide', !!user);
+  $('panel').classList.toggle('hide', !user);
+  $('userBox').classList.toggle('hide', !user);
+  $('whoami').textContent = user ? user.email : '';
+  if (user) subscribe(); else images = [];
+});
+
+/* ---------- data ---------- */
+let unsub = null;
+function subscribe() {
+  if (unsub) return;
+  const q = query(collection(db, 'images'), orderBy('createdAt', 'desc'), limit(300));
+  unsub = onSnapshot(q, snap => {
+    images = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  }, err => {
+    $('stat').textContent = 'خطأ في القراءة: ' + err.code;
+  });
+}
+
+function render() {
+  const fs = $('fSubject').value;
+  const term = $('fSearch').value.trim().toLowerCase();
+
+  const list = images.filter(i =>
+    (fs === 'all' || i.subject === fs) &&
+    (!term || (i.title || i.originalName || '').toLowerCase().includes(term))
+  );
+
+  $('rows').innerHTML = list.map(i => {
+    const s = byId[i.subject] || { name: i.subject };
+    return `<tr data-id="${i.id}">
+      <td><img src="${i.thumb || i.dataUrl}" alt=""></td>
+      <td>
+        <input type="text" value="${esc(i.title || '')}" data-k="title" placeholder="بدون عنوان" style="width:100%">
+        <div class="muted">${esc(i.originalName || '')}</div>
+      </td>
+      <td>
+        <select data-k="subject">
+          ${SUBJECTS.map(x => `<option value="${x.id}" ${x.id === i.subject ? 'selected' : ''}>${x.emoji} ${x.name}</option>`).join('')}
+        </select>
+      </td>
+      <td><input type="date" value="${esc(i.date || '')}" data-k="date"></td>
+      <td class="muted">${sizeTxt(i.bytes)}<div>${i.width || '?'}×${i.height || '?'}</div></td>
+      <td><button class="d" data-del>حذف</button></td>
+    </tr>`;
+  }).join('');
+
+  $('stat').textContent = `عدد الصور المعروضة: ${list.length} من ${images.length}`;
+
+  $('rows').querySelectorAll('tr').forEach(tr => {
+    const id = tr.dataset.id;
+
+    tr.querySelectorAll('[data-k]').forEach(el => {
+      el.onchange = async () => {
+        const k = el.dataset.k;
+        const v = el.value.trim() || (k === 'title' ? null : null);
+        try { await updateDoc(doc(db, 'images', id), { [k]: v }); }
+        catch (err) { alert('فشل التعديل: ' + err.code); }
+      };
+    });
+
+    tr.querySelector('[data-del]').onclick = async () => {
+      if (!confirm('متأكد من حذف الصورة؟')) return;
+      try { await deleteDoc(doc(db, 'images', id)); }
+      catch (err) { alert('فشل الحذف: ' + err.code); }
+    };
+  });
+}
+
+$('fSubject').onchange = render;
+$('fSearch').oninput = render;
+
+/* ---------- export ---------- */
+$('export').onclick = () => {
+  const data = images.map(({ title, subject, date, dataUrl, originalName, bytes }) =>
+    ({ title, subject, date, originalName, bytes, dataUrl }));
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'images-backup.json';
+  a.click();
+};
+</script>
+</body>
+</html>
